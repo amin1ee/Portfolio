@@ -1,6 +1,8 @@
 name: Super-Linter
 
-on: push
+on:
+  push:
+    branches: [main]
 
 jobs:
   super-lint:
@@ -8,10 +10,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Run Super-Linter
         uses: github/super-linter@v4
         env:
           DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # OPTIONAL: specify languages to lint
+          # VALIDATE_PHP: true
+          # VALIDATE_JAVASCRIPT_ES: true
+          # VALIDATE_CSS: true
