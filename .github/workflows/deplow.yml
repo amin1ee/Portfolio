@@ -1,23 +1,51 @@
-name: Super-Linter
+name: Laravel + React Lint
 
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
-  super-lint:
-    name: Lint code base
+  setup-and-lint:
+    name: Setup environment and lint code
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
+      # 1️⃣ Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v3
 
+      # 2️⃣ Setup PHP (Laravel requirement)
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2  # Change to your Laravel PHP version
+          extensions: mbstring, bcmath, xml, curl
+          coverage: none
+
+      # 3️⃣ Install Composer dependencies
+      - name: Install Composer dependencies
+        run: composer install --no-progress --no-suggest --prefer-dist
+
+      # 4️⃣ Setup Node.js (React requirement)
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20  # Use your Node version
+          cache: "npm"
+
+      # 5️⃣ Install Node.js dependencies
+      - name: Install Node dependencies
+        run: npm install
+
+      # 6️⃣ Run Super-Linter
       - name: Run Super-Linter
         uses: github/super-linter@v4
         env:
           DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # OPTIONAL: specify languages to lint
-          # VALIDATE_PHP: true
-          # VALIDATE_JAVASCRIPT_ES: true
-          # VALIDATE_CSS: true
+          VALIDATE_PHP: true
+          VALIDATE_JAVASCRIPT_ES: true
+          VALIDATE_CSS: true
+          VALIDATE_HTML: true
