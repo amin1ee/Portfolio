@@ -1,51 +1,27 @@
-name: Laravel + React Lint
+name: Simple Deploy
 
 on:
   push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+    branches:
+      - main  # deploy only from main branch
 
 jobs:
-  setup-and-lint:
-    name: Setup environment and lint code
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout code
+      # 1️⃣ Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2️⃣ Setup PHP (Laravel requirement)
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+      # 2️⃣ Deploy via SSH
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v0.1.9
         with:
-          php-version: 8.2  # Change to your Laravel PHP version
-          extensions: mbstring, bcmath, xml, curl
-          coverage: none
-
-      # 3️⃣ Install Composer dependencies
-      - name: Install Composer dependencies
-        run: composer install --no-progress --no-suggest --prefer-dist
-
-      # 4️⃣ Setup Node.js (React requirement)
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20  # Use your Node version
-          cache: "npm"
-
-      # 5️⃣ Install Node.js dependencies
-      - name: Install Node dependencies
-        run: npm install
-
-      # 6️⃣ Run Super-Linter
-      - name: Run Super-Linter
-        uses: github/super-linter@v4
-        env:
-          DEFAULT_BRANCH: main
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VALIDATE_PHP: true
-          VALIDATE_JAVASCRIPT_ES: true
-          VALIDATE_CSS: true
-          VALIDATE_HTML: true
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          port: 22
+          source: "./"                     # all repo files
+          target: "/var/www/html/your-project"  # destination on server
+          rsync_opts: "-avz --delete"      # sync files and delete removed files
