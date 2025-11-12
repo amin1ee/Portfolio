@@ -14,7 +14,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2️⃣ Deploy via SSH
+      # 2️⃣ Setup PHP (optional, only if you have composer)
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+
+      # 3️⃣ Install Composer dependencies but skip tests/scripts
+      - name: Install Composer dependencies
+        run: composer install --no-dev --no-scripts --no-progress --no-suggest --prefer-dist --optimize-autoloader
+
+      # 4️⃣ Deploy via SSH
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v0.1.9
         with:
@@ -22,6 +32,6 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_KEY }}
           port: 22
-          source: "./"                     # all repo files
-          target: "/var/www/html/your-project"  # destination on server
-          rsync_opts: "-avz --delete"      # sync files and delete removed files
+          source: "./"
+          target: "/var/www/html/your-project"
+          rsync_opts: "-avz --delete"
